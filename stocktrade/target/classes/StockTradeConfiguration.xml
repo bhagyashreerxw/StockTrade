@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd
+          http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+
+	<!-- for reading property files -->
+	<context:property-placeholder
+		location="classpath:database.properties,
+		          classpath:dbtype.properties" />
+
+
+	<!-- stockTradeFactory -->
+	<bean id="stockTradeDaoFactory"
+		class="com.reactiveworks.stocktrade.dao.StockTradeFactory">
+		<property name="implType" value="${dbType}"></property>
+		<property name="stockTrdDaoCsvImpl" ref="stockTrdDaoCsvImpl"></property>
+		<property name="stockTrdDaoMysqlImpl"
+			ref="stockTrdDaoMysqlImpl"></property>
+	</bean>
+	
+	<bean id="stockTradeDao"
+		class="com.reactiveworks.stocktrade.dao.StockTradeFactory"
+		factory-method="getInstance" factory-bean="stockTradeDaoFactory">
+	</bean>
+
+	<bean id="stockTrdDaoCsvImpl"
+		class="com.reactiveworks.stocktrade.dao.impl.StockTradeDaoCsvImpl"></bean>
+
+	<bean id="stockTrdDaoMysqlImpl"
+		class="com.reactiveworks.stocktrade.dao.impl.StockTradeDaoMysqlImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
+
+
+	<bean id="jdbcTemplate"
+		class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- <bean id="JdbcDaoSupport" class="org.springframework.jdbc.core.support.JdbcDaoSupport"> 
+		</bean> -->
+
+	<bean id="dataSource"
+		class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${db.driver}"></property>
+		<property name="url" value="${db.url}"></property>
+		<property name="username" value="${db.username}"></property>
+		<property name="password" value="${db.password}"></property>
+	</bean>
+
+	<bean id="stockTrdService"
+		class="com.reactiveworks.stocktrade.service.implementation.StockTradeService">
+		<property name="stockTradeDao" ref="stockTradeDao"></property>
+	</bean>
+
+</beans>
